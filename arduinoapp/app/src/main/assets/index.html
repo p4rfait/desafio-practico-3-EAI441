@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+    <title>Control del Motor y Sensor Ultrasonido</title>
+    <style>
+                @font-face {
+                    font-family: Iosevka;
+                    src: url("file:///android_asset/fonts/IosevkaNerdFont-Regular.ttf")
+                }
+                * {
+                  font-family: Iosevka;
+                }
+
+                body {
+                  background: #1d2021;
+                  color: #ebdbb2;
+                  display: flex;
+                  flex-direction: column;
+                  align-items: center;
+                  padding: 16px;
+                }
+
+                h1 {
+                  color: #ebdbb2;
+                }
+
+                .panel {
+                  border: 2px solid #D3869B;
+                  background: #282828;
+                  padding: 16px;
+                  max-width: 400px;
+                  width: 100%;
+                  text-align: center;
+                }
+
+                input,
+                button {
+                  margin: 8px;
+                  padding: 8px;
+                  border: none;
+                  font-size: 16px;
+                }
+
+                input {
+                  background-color: #504945;
+                  color: #ebdbb2;
+                  width: 60%;
+                  text-align: center;
+                }
+
+                button {
+                  background: #1D2021;
+                  border: 1px solid #403D32;
+                  color: #ebdbb2;
+                  cursor: pointer;
+                  transition: background 0.2s;
+                }
+
+                .control {
+                  width: 64px;
+                  height: 64px;
+                  font-size: 24px;
+                }
+
+                .wide {
+                  text-indent: -8px;
+                }
+
+                button:hover {
+                  border: 1px solid #D3869B;
+                }
+
+                button:active {
+                  background-color: #D3869B;
+                  color: #1d2021;
+                }
+
+                .status {
+                  margin-top: 24px;
+                  background: #504945;
+                  padding: 16px;
+                  text-align: left;
+                }
+
+                hr {
+                    border-color: #ebdbb280;
+                }
+    </style>
+</head>
+
+<body>
+<h1>Control de Motor y Sensor</h1>
+
+<div class="panel">
+    <h2>Conexión</h2>
+    <input id="ipInput" type="text" placeholder="Ej: 192.168.1.123" />
+    <button onclick="connect()">Conectar</button>
+    <p id="connectionStatus">Estado: <strong>Desconectado</strong></p>
+
+    <hr>
+
+    <h2>Controles Manuales</h2>
+    <button class="control wide" onclick="sendCommand('L')"> </button>
+    <button class="control" onclick="sendCommand('S')"></button>
+    <button class="control wide" onclick="sendCommand('R')"></button>
+
+    <h2>Modo</h2>
+    <button onclick="sendCommand('MANUAL')">Manual </button>
+    <button onclick="sendCommand('AUTO')">Automático </button>
+
+    <div class="status">
+        <h3>Estado actual:</h3>
+        <p><strong>Distancia:</strong> <span id="distancia">--</span> cm</p>
+        <p><strong>Modo:</strong> <span id="modo">--</span></p>
+        <p><strong>Dirección:</strong> <span id="direccion">--</span></p>
+    </div>
+    <p class="credits">Hecho con  por Tomás Campos, Erika Guardado y William Bonilla</p>
+</div>
+
+<script>
+    let arduinoIP = null;
+    let intervalId = null;
+
+    function connect() {
+      const ipField = document.getElementById("ipInput");
+      const ip = ipField.value.trim();
+
+      if (!ip) {
+        alert("Por favor ingresa la IP del Arduino.");
+        return;
+      }
+
+      arduinoIP = `http://${ip}`;
+      document.getElementById("connectionStatus").innerHTML =
+        `Estado: <strong>Conectado a ${arduinoIP}</strong>`;
+
+      if (intervalId) clearInterval(intervalId);
+      getData();
+      intervalId = setInterval(getData, 2000);
+    }
+
+    async function sendCommand(cmd) {
+      if (!arduinoIP) {
+        alert("Primero conéctate ingresando la IP del Arduino.");
+        return;
+      }
+
+      try {
+        await fetch(`${arduinoIP}/${cmd}`);
+        if (cmd !== 'DATA') setTimeout(getData, 500);
+      } catch (error) {
+        console.error("Error al enviar comando:", error);
+      }
+    }
+
+    async function getData() {
+      if (!arduinoIP) return;
+
+      try {
+        const response = await fetch(`${arduinoIP}/DATA`);
+        const data = await response.json();
+
+        document.getElementById("distancia").textContent = data.distancia.toFixed(2);
+        document.getElementById("modo").textContent = data.modo;
+        document.getElementById("direccion").textContent = data.direccion;
+      } catch (error) {
+        console.error("Error obteniendo datos:", error);
+        document.getElementById("distancia").textContent = "Error";
+        document.getElementById("modo").textContent = "Error";
+        document.getElementById("direccion").textContent = "Error";
+      }
+    }
+</script>
+</body>
+
+</html>

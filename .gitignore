@@ -1,0 +1,15 @@
+arduinoapp/*.iml
+arduinoapp/.gradle
+arduinoapp/local.properties
+arduinoapp/.idea/caches
+arduinoapp/.idea/libraries
+arduinoapp/.idea/modules.xml
+arduinoapp/.idea/workspace.xml
+arduinoapp/.idea/navEditor.xml
+arduinoapp/.idea/assetWizardSettings.xml
+arduinoapp/.DS_Store
+arduinoapp/build
+arduinoapp/captures
+arduinoapp/.externalNativeBuild
+arduinoapp/.cxx
+arduinoapp/local.properties
